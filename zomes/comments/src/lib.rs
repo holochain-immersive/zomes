@@ -6,6 +6,7 @@ pub struct Comment {
 }
 
 #[hdk_link_types]
+#[cfg(not(feature = "exercise2step4"))]
 pub enum LinkTypes {
     CommentedOnToComment,
 }
