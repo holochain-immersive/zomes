@@ -21,10 +21,12 @@ pub enum EntryTypes {
     Post(Post),
 }
 
+#[cfg(not(feature = "exercise3step4"))]
 fn all_channels_path() -> ExternResult<TypedPath> {
     Path::from("all_posts").typed(LinkTypes::PathToChannel)
 }
 
+#[cfg(not(feature = "exercise3step4"))]
 fn channel_path(channel: String) -> ExternResult<TypedPath> {
     let mut path = all_channels_path()?;
     path.path.append_component(channel.into());
@@ -77,7 +79,7 @@ pub fn get_channel_posts(channel: String) -> ExternResult<Vec<ActionHash>> {
 }
 
 #[hdk_extern]
-#[cfg(not(feature = "exercise3step7"))]
+#[cfg(not(feature = "exercise3step4"))]
 pub fn get_all_channels(_: ()) -> ExternResult<Vec<String>> {
     let path = all_channels_path()?;
 
