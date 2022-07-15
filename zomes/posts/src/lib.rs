@@ -7,6 +7,7 @@ pub struct Post {
 }
 
 #[hdk_link_types]
+#[cfg(not(feature = "exercise3step4"))]
 pub enum LinkTypes {
     PathToChannel,
     ChannelToPost,
