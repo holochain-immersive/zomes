@@ -6,7 +6,7 @@ pub struct Comment {
 }
 
 #[hdk_link_types]
-#[cfg(not(feature = "exercise2step4"))]
+#[cfg(not(feature = "exercise2step3"))]
 pub enum LinkTypes {
     CommentedOnToComment,
 }
@@ -45,7 +45,7 @@ pub fn create_comment(input: CreateCommentInput) -> ExternResult<ActionHash> {
 
 // Gets all the "Comment" entries that have been associated with the given header
 #[hdk_extern]
-#[cfg(not(feature = "exercise2step4"))]
+#[cfg(not(feature = "exercise2step3"))]
 pub fn get_comments_on(action_hash: ActionHash) -> ExternResult<Vec<Record>> {
     let links = get_links(action_hash, LinkTypes::CommentedOnToComment, None)?;
 
