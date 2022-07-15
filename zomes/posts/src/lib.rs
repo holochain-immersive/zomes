@@ -60,7 +60,7 @@ pub fn create_post(input: CreatePostInput) -> ExternResult<ActionHash> {
 
 // Get the header hashes for all the posts that have been created
 #[hdk_extern]
-#[cfg(not(feature = "exercise3step6"))]
+#[cfg(not(feature = "exercise3step4"))]
 pub fn get_channel_posts(channel: String) -> ExternResult<Vec<ActionHash>> {
     let path = channel_path(channel)?;
 
