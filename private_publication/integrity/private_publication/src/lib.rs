@@ -7,8 +7,8 @@ mod properties;
 mod publication_role;
 
 use membrane::is_membrane_proof_valid;
-use post::{validate_create_post, validate_delete_post, validate_update_post};
-use publication_role::{validate_create_role, validate_delete_role, validate_update_role};
+use post::{validate_create_post, validate_update_post};
+use publication_role::validate_create_role;
 
 pub use post::Post;
 pub use publication_role::PublicationRole;
@@ -29,11 +29,10 @@ pub enum LinkTypes {
 ////////////////////////////////////////////////////////////////////////////////
 // Genesis self-check callback
 ////////////////////////////////////////////////////////////////////////////////
-/* 
 #[hdk_extern]
 pub fn genesis_self_check(data: GenesisSelfCheckData) -> ExternResult<ValidateCallbackResult> {
     is_membrane_proof_valid(data.agent_key, data.membrane_proof)
-} */
+}
 
 #[hdk_extern]
 pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
@@ -90,12 +89,11 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         update.hashed.content,
                         new_entry,
                     ),
-                    Some(EntryTypes::PublicationRole(role)) => validate_update_role(
-                        original_action,
-                        original_entry,
-                        update.hashed.content,
-                        new_entry,
-                    ),
+                    Some(EntryTypes::PublicationRole(role)) => {
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "Roles cannot be updated".to_string(),
+                        ))
+                    }
                     None => {
                         return Ok(ValidateCallbackResult::Invalid(
                             "expected app entry type, got none".to_string(),
@@ -126,10 +124,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     &original_entry,
                 )? {
                     Some(EntryTypes::Post(post)) => {
-                        validate_delete_post(original_action, delete.hashed.content)
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "Posts cannot be deleted".to_string(),
+                        ))
                     }
                     Some(EntryTypes::PublicationRole(role)) => {
-                        validate_delete_role(delete.hashed.content)
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "Roles cannot be deleted".to_string(),
+                        ))
                     }
                     None => {
                         return Ok(ValidateCallbackResult::Invalid(

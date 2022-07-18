@@ -1091,6 +1091,7 @@ version = "0.0.1"
 dependencies = [
  "derive_more",
  "hdi",
+ "membrane_proof",
  "serde",
 ]
 

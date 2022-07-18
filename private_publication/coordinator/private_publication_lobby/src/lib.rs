@@ -1,5 +1,7 @@
-use hdk::prelude::*;
-use private_publication_lobby_integrity;
+use hdk::prelude::{holo_hash::DnaHash, *};
+use private_publication_lobby_integrity::{
+    self, EntryTypes, LinkTypes, PrivatePublicationMembraneProof,
+};
 
 #[hdk_extern]
 fn progenitor(_: ()) -> ExternResult<AgentPubKey> {
@@ -111,4 +113,56 @@ pub fn store_capability_claim(cap_secret: CapSecret) -> ExternResult<()> {
     create_cap_claim(cap_claim)?;
 
     Ok(())
+}
+
+#[hdk_extern]
+#[cfg(not(feature = "exercise2"))]
+pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()> {
+    let response = call(
+        CallTargetCell::OtherRole("private_publication".into()),
+        ZomeName::from("posts"),
+        "get_dna_hash".into(),
+        None,
+        (),
+    )?;
+
+    let hash: DnaHash = match response {
+        ZomeCallResponse::Ok(result) => result
+            .decode::<DnaHash>()
+            .map_err(|err| wasm_error!(err.into())),
+        _ => Err(wasm_error!(WasmErrorInner::Guest(
+            "Error making the call remote".into()
+        ))),
+    }?;
+
+    let action_hash = create_entry(EntryTypes::PrivatePublicationMembraneProof(
+        PrivatePublicationMembraneProof {
+            dna_hash: hash,
+            recipient: agent_pub_key.clone(),
+        },
+    ))?;
+
+    create_link(
+        agent_pub_key,
+        action_hash,
+        LinkTypes::AgentToMembraneProof,
+        (),
+    )?;
+
+    Ok(())
+}
+
+#[hdk_extern]
+#[cfg(not(feature = "exercise2"))]
+pub fn get_my_membrane_proof(_: ()) -> ExternResult<Option<Record>> {
+    let links = get_links(
+        agent_info()?.agent_initial_pubkey,
+        LinkTypes::AgentToMembraneProof,
+        None,
+    )?;
+
+    match links.first() {
+        None => Ok(None),
+        Some(link) => get(ActionHash::from(link.target.clone()), GetOptions::default()),
+    }
 }

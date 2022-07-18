@@ -28,20 +28,3 @@ pub fn validate_create_role(
         )),
     }
 }
-
-pub fn validate_update_role(
-    original_action: EntryCreationAction,
-    original_entry: Entry,
-    action: Update,
-    new_entry: Entry,
-) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Invalid(
-        "Cannot update roles".into(),
-    ))
-}
-
-pub fn validate_delete_role(delete: Delete) -> ExternResult<ValidateCallbackResult> {
-    Ok(ValidateCallbackResult::Invalid(
-        "Cannot delete roles".into(),
-    ))
-}

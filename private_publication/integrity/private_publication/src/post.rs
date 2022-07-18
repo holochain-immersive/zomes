@@ -36,15 +36,3 @@ pub fn validate_update_post(
         ))),
     }
 }
-
-pub fn validate_delete_post(
-    original_action: EntryCreationAction,
-    action: Delete,
-) -> ExternResult<ValidateCallbackResult> {
-    match original_action.author().eq(&action.author) {
-        true => Ok(ValidateCallbackResult::Valid),
-        false => Ok(ValidateCallbackResult::Invalid(String::from(
-            "Only the author of a post can update it",
-        ))),
-    }
-}
