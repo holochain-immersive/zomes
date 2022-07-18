@@ -33,7 +33,7 @@ pub fn is_membrane_proof_valid(
             if !verify_signature(
                 progenitor_pub_key,
                 record.signature().clone(),
-                record.action_hashed(),
+                record.action_hashed().as_content(),
             )? {
                 return Ok(ValidateCallbackResult::Invalid(
                     "The signature of the record is not valid".into(),
