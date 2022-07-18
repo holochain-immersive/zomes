@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "private_publication_integrity"
+version = "0.0.1"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "private_publication_integrity"
+
+[dependencies]
+derive_more = "0"
+serde = "1"
+
+hdi = "0.0.14"
+holo_hash = {version = "0.0.30", features = ["encoding"]}
+membrane_proof = {path = "../membrane_proof"}
