@@ -13,7 +13,3 @@ private_publication_lobby_integrity = {path = "../../integrity/private_publicati
 serde = "1"
 
 hdk = "0.0.142"
-
-[features]
-exercise = []
-exercise2 = []
