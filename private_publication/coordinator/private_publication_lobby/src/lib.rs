@@ -1,5 +1,10 @@
 use hdk::prelude::*;
-use private_publication_lobby_integrity::*;
+use private_publication_lobby_integrity;
+
+#[hdk_extern]
+fn progenitor(_: ()) -> ExternResult<AgentPubKey> {
+    private_publication_lobby_integrity::progenitor()
+}
 
 #[hdk_extern]
 pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
@@ -24,7 +29,7 @@ pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
         ))),
         Some(claim) => {
             let response = call_remote(
-                progenitor()?,
+                progenitor(())?,
                 zome_info()?.name,
                 "request_read_all_posts".into(),
                 Some(claim.secret),
@@ -98,7 +103,7 @@ pub fn grant_capability_to_read(grantee: AgentPubKey) -> ExternResult<CapSecret>
 #[hdk_extern]
 pub fn store_capability_claim(cap_secret: CapSecret) -> ExternResult<()> {
     let cap_claim = CapClaim {
-        grantor: progenitor()?,
+        grantor: progenitor(())?,
         secret: cap_secret,
         tag: String::from("get_all_posts"),
     };
