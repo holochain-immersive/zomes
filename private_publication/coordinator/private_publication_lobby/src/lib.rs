@@ -116,7 +116,6 @@ pub fn store_capability_claim(cap_secret: CapSecret) -> ExternResult<()> {
 }
 
 #[hdk_extern]
-#[cfg(not(feature = "exercise2"))]
 pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()> {
     let response = call(
         CallTargetCell::OtherRole("private_publication".into()),
@@ -153,7 +152,6 @@ pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()>
 }
 
 #[hdk_extern]
-#[cfg(not(feature = "exercise2"))]
 pub fn get_my_membrane_proof(_: ()) -> ExternResult<Option<Record>> {
     let links = get_links(
         agent_info()?.agent_initial_pubkey,
