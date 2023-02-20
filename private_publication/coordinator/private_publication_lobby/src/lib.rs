@@ -50,7 +50,7 @@ pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
 #[hdk_extern]
 pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
     let response = call(
-        CallTargetCell::OtherRole("private_publication.1".into()),
+        CallTargetCell::OtherRole("private_publication.0".into()),
         ZomeName::from("posts"),
         "get_all_posts".into(),
         None,
@@ -118,7 +118,7 @@ pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<
 #[hdk_extern]
 pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()> {
     let response = call(
-        CallTargetCell::OtherRole("private_publication.1".into()),
+        CallTargetCell::OtherRole("private_publication.0".into()),
         ZomeName::from("posts"),
         "get_dna_hash".into(),
         None,
