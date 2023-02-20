@@ -8,7 +8,7 @@ pub struct Properties {
 
 pub fn progenitor() -> ExternResult<AgentPubKey> {
     let properties = dna_info()?.properties;
-
+    error!("properties {:?}", properties);
     let progenitor_properties: Properties =
         Properties::try_from(properties).map_err(|err| wasm_error!(err))?;
 
