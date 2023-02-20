@@ -13,7 +13,7 @@ pub enum LinkTypes {
 }
 
 #[hdk_extern]
-pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
+pub fn validate(_op: Op) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 
@@ -26,7 +26,7 @@ pub fn progenitor() -> ExternResult<AgentPubKey> {
     let properties = dna_info()?.properties;
 
     let progenitor_properties: Properties =
-        Properties::try_from(properties).map_err(|err| wasm_error!(err.into()))?;
+        Properties::try_from(properties).map_err(|err| wasm_error!(err))?;
 
     Ok(progenitor_properties.progenitor.into())
 }

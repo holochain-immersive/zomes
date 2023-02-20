@@ -89,9 +89,10 @@ pub fn get_all_channels(_: ()) -> ExternResult<Vec<String>> {
         .into_iter()
         .filter_map(|p| p.leaf().cloned())
         .map(|c| String::try_from(&c))
-        .collect::<Result<Vec<String>, SerializedBytesError>>();
+        .collect::<Result<Vec<String>, SerializedBytesError>>()
+        .map_err(|err| wasm_error!(err))?;
 
-    channels.map_err(|err| wasm_error!(err.into()))
+    Ok(channels)
 }
 
 #[derive(Serialize, Deserialize, Debug)]

@@ -11,5 +11,5 @@ name = "private_publication_lobby_integrity"
 derive_more = "0"
 serde = "1"
 
-hdi = "0.0.14"
-membrane_proof = {path = "../membrane_proof"}
+hdi = { workspace = true }
+membrane_proof = { path = "../membrane_proof" }

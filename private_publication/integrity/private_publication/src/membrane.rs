@@ -22,7 +22,7 @@ pub fn is_membrane_proof_valid(
         Some(proof) => {
             let bytes = Arc::try_unwrap(proof)
                 .map_err(|err| wasm_error!(WasmErrorInner::Guest(format!("{:?}", err))))?;
-            let record = Record::try_from(bytes).map_err(|err| wasm_error!(err.into()))?;
+            let record = Record::try_from(bytes).map_err(|err| wasm_error!(err))?;
 
             if !record.action().author().eq(&progenitor_pub_key) {
                 return Ok(ValidateCallbackResult::Invalid(
@@ -44,7 +44,7 @@ pub fn is_membrane_proof_valid(
                 record
                     .entry()
                     .to_app_option()
-                    .map_err(|err| wasm_error!(err.into()))?;
+                    .map_err(|err| wasm_error!(err))?;
 
             match maybe_private_publication_membrane_proof {
                 Some(private_publication_membrane_proof) => {

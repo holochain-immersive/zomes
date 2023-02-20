@@ -11,7 +11,7 @@ name = "comments_zome"
 derive_more = "0"
 serde = "1"
 
-hdk = {version = "0.0.140"}
+hdk = { workspace = true }
 
 [features]
 exercisestep = []

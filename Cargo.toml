@@ -11,3 +11,7 @@ opt-level = "z"
 
 [profile.release]
 opt-level = "z"
+
+[workspace.dependencies]
+hdk = "0.1"
+hdi = "0.2"

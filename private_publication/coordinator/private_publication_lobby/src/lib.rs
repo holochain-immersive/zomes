@@ -40,8 +40,7 @@ pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
 
             match response {
                 ZomeCallResponse::Ok(result) => {
-                    let posts: Vec<Record> =
-                        result.decode().map_err(|err| wasm_error!(err.into()))?;
+                    let posts: Vec<Record> = result.decode().map_err(|err| wasm_error!(err))?;
 
                     Ok(posts)
                 }
@@ -65,7 +64,7 @@ pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
 
     match response {
         ZomeCallResponse::Ok(result) => {
-            let posts: Vec<Record> = result.decode().map_err(|err| wasm_error!(err.into()))?;
+            let posts: Vec<Record> = result.decode().map_err(|err| wasm_error!(err))?;
 
             Ok(posts)
         }
@@ -90,10 +89,10 @@ pub fn grant_capability_to_read(grantee: AgentPubKey) -> ExternResult<CapSecret>
             secret: cap_secret.clone(),
             assignees: BTreeSet::from([grantee]),
         },
-        functions: BTreeSet::from([(
+        functions: GrantedFunctions::Listed(BTreeSet::from([(
             zome_info()?.name,
             FunctionName::from("request_read_all_posts"),
-        )]),
+        )])),
         tag: String::from(""),
     };
 
@@ -126,9 +125,7 @@ pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()>
     )?;
 
     let hash: DnaHash = match response {
-        ZomeCallResponse::Ok(result) => result
-            .decode::<DnaHash>()
-            .map_err(|err| wasm_error!(err.into())),
+        ZomeCallResponse::Ok(result) => result.decode::<DnaHash>().map_err(|err| wasm_error!(err)),
         _ => Err(wasm_error!(WasmErrorInner::Guest(
             "Error making the call remote".into()
         ))),

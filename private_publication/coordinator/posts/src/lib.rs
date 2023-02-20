@@ -1,4 +1,4 @@
-use hdk::prelude::{*, holo_hash::DnaHash};
+use hdk::prelude::{holo_hash::DnaHash, *};
 use private_publication_integrity::{EntryTypes, LinkTypes, Post};
 
 #[hdk_extern]

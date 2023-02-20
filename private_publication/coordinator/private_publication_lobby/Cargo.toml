@@ -9,7 +9,7 @@ name = "private_publication_lobby"
 
 [dependencies]
 derive_more = "0"
-private_publication_lobby_integrity = {path = "../../integrity/private_publication_lobby"}
+private_publication_lobby_integrity = { path = "../../integrity/private_publication_lobby" }
 serde = "1"
 
-hdk = "0.0.142"
+hdk = { workspace = true }

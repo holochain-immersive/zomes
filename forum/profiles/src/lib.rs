@@ -53,7 +53,7 @@ fn get_profile(action_hash: ActionHash) -> ExternResult<Option<Profile>> {
             let profile: Profile = element
                 .entry()
                 .to_app_option()
-                .map_err(|e| wasm_error!(e.into()))?
+                .map_err(|err| wasm_error!(err))?
                 .ok_or(wasm_error!(WasmErrorInner::Guest(
                     "Could not deserialize element to Profile.".into(),
                 )))?;
