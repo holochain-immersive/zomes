@@ -4,12 +4,7 @@ use private_publication_lobby_integrity::{
 };
 
 #[hdk_extern]
-fn progenitor(_: ()) -> ExternResult<AgentPubKey> {
-    private_publication_lobby_integrity::progenitor()
-}
-
-#[hdk_extern]
-pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
+pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
     let claims_records = query(
         ChainQueryFilter::new()
             .entry_type(EntryType::CapClaim)
@@ -31,7 +26,7 @@ pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
         ))),
         Some(claim) => {
             let response = call_remote(
-                progenitor(())?,
+                author,
                 zome_info()?.name,
                 "request_read_all_posts".into(),
                 Some(claim.secret),
@@ -55,7 +50,7 @@ pub fn read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
 #[hdk_extern]
 pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
     let response = call(
-        CallTargetCell::OtherRole("private_publication".into()),
+        CallTargetCell::OtherRole("private_publication.1".into()),
         ZomeName::from("posts"),
         "get_all_posts".into(),
         None,
@@ -101,11 +96,17 @@ pub fn grant_capability_to_read(grantee: AgentPubKey) -> ExternResult<CapSecret>
     Ok(cap_secret)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StoreCapabilityClaimInput {
+    cap_secret: CapSecret,
+    grantor: AgentPubKey,
+}
+
 #[hdk_extern]
-pub fn store_capability_claim(cap_secret: CapSecret) -> ExternResult<()> {
+pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<()> {
     let cap_claim = CapClaim {
-        grantor: progenitor(())?,
-        secret: cap_secret,
+        grantor: input.grantor,
+        secret: input.cap_secret,
         tag: String::from("get_all_posts"),
     };
 
@@ -117,7 +118,7 @@ pub fn store_capability_claim(cap_secret: CapSecret) -> ExternResult<()> {
 #[hdk_extern]
 pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()> {
     let response = call(
-        CallTargetCell::OtherRole("private_publication".into()),
+        CallTargetCell::OtherRole("private_publication.1".into()),
         ZomeName::from("posts"),
         "get_dna_hash".into(),
         None,
