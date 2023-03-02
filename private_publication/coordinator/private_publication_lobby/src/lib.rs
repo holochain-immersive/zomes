@@ -58,7 +58,7 @@ pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<
 }
 
 #[hdk_extern]
-pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
+pub fn read_posts_for_author(author: AgentPubKey) -> ExternResult<Vec<Record>> {
     let claims_records = query(
         ChainQueryFilter::new()
             .entry_type(EntryType::CapClaim)
@@ -82,7 +82,7 @@ pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
             let response = call_remote(
                 author,
                 zome_info()?.name,
-                "request_read_all_posts".into(),
+                "request_read_private_publication_posts".into(),
                 Some(claim.secret),
                 (),
             )?;
@@ -102,7 +102,7 @@ pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
 }
 
 #[hdk_extern]
-pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
+pub fn request_read_private_publication_posts(_: ()) -> ExternResult<Vec<Record>> {
     let cap_grant = call_info()?.cap_grant;
 
     let CapGrant::RemoteAgent( zome_call_cap_grant) = cap_grant else {
