@@ -135,7 +135,7 @@ pub fn request_read_private_publication_posts(_: ()) -> ExternResult<Vec<Record>
             Ok(posts)
         }
         _ => Err(wasm_error!(WasmErrorInner::Guest(
-            "Error making the call remote".into()
+            format!("Error making the call remote: {:?}", response)
         ))),
     }
 }
