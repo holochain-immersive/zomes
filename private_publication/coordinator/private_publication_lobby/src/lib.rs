@@ -1,7 +1,61 @@
-use hdk::prelude::{holo_hash::DnaHash, *};
+use hdk::prelude::{
+    holo_hash::{DnaHash, DnaHashB64},
+    *,
+};
 use private_publication_lobby_integrity::{
     self, EntryTypes, LinkTypes, PrivatePublicationMembraneProof,
 };
+
+fn build_secret() -> ExternResult<CapSecret> {
+    let bytes = random_bytes(64)?;
+    CapSecret::try_from(bytes.into_vec())
+        .map_err(|_| wasm_error!(WasmErrorInner::Guest("Could not build secret".into())))
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GrantCapabilityToReadInput {
+    reader: AgentPubKey,
+    private_publication_dna_hash: DnaHash,
+}
+#[hdk_extern]
+pub fn grant_capability_to_read(input: GrantCapabilityToReadInput) -> ExternResult<CapSecret> {
+    let cap_secret = build_secret()?;
+
+    let cap_grant_entry = CapGrantEntry {
+        access: CapAccess::Assigned {
+            secret: cap_secret.clone(),
+            assignees: BTreeSet::from([input.reader]),
+        },
+        functions: GrantedFunctions::Listed(BTreeSet::from([(
+            zome_info()?.name,
+            FunctionName::from("request_read_all_posts"),
+        )])),
+        tag: DnaHashB64::from(input.private_publication_dna_hash).to_string(),
+    };
+
+    create_cap_grant(cap_grant_entry)?;
+
+    Ok(cap_secret)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StoreCapabilityClaimInput {
+    cap_secret: CapSecret,
+    grantor: AgentPubKey,
+}
+
+#[hdk_extern]
+pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<()> {
+    let cap_claim = CapClaim {
+        grantor: input.grantor,
+        secret: input.cap_secret,
+        tag: String::from("get_all_posts"),
+    };
+
+    create_cap_claim(cap_claim)?;
+
+    Ok(())
+}
 
 #[hdk_extern]
 pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
@@ -49,8 +103,25 @@ pub fn read_all_posts(author: AgentPubKey) -> ExternResult<Vec<Record>> {
 
 #[hdk_extern]
 pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
+    let cap_grant = call_info()?.cap_grant;
+
+    let CapGrant::RemoteAgent( zome_call_cap_grant) = cap_grant else {
+        return Err(wasm_error!(WasmErrorInner::Guest(String::from("request_read_all_posts must be called using a cap grant"))));
+    };
+
+    let private_publication_dna_hash = DnaHash::from(
+        DnaHashB64::from_b64_str(zome_call_cap_grant.tag.as_str()).or(Err(wasm_error!(
+            WasmErrorInner::Guest(String::from("Bad cap_grant tag"))
+        )))?,
+    );
+
+    let private_publication_cell_id = CellId::new(
+        private_publication_dna_hash,
+        agent_info()?.agent_latest_pubkey,
+    );
+
     let response = call(
-        CallTargetCell::OtherRole("private_publication.0".into()),
+        CallTargetCell::OtherCell(private_publication_cell_id),
         ZomeName::from("posts"),
         "get_all_posts".into(),
         None,
@@ -69,78 +140,14 @@ pub fn request_read_all_posts(_: ()) -> ExternResult<Vec<Record>> {
     }
 }
 
-fn build_secret() -> ExternResult<CapSecret> {
-    let bytes = random_bytes(64)?;
-    CapSecret::try_from(bytes.into_vec())
-        .map_err(|_| wasm_error!(WasmErrorInner::Guest("Could not build secret".into())))
-}
+/** Exercise 2 */
 
 #[hdk_extern]
-pub fn grant_capability_to_read(grantee: AgentPubKey) -> ExternResult<CapSecret> {
-    let cap_secret = build_secret()?;
-
-    let cap_grant_entry = CapGrantEntry {
-        access: CapAccess::Assigned {
-            secret: cap_secret.clone(),
-            assignees: BTreeSet::from([grantee]),
-        },
-        functions: GrantedFunctions::Listed(BTreeSet::from([(
-            zome_info()?.name,
-            FunctionName::from("request_read_all_posts"),
-        )])),
-        tag: String::from(""),
-    };
-
-    create_cap_grant(cap_grant_entry)?;
-
-    Ok(cap_secret)
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct StoreCapabilityClaimInput {
-    cap_secret: CapSecret,
-    grantor: AgentPubKey,
-}
-
-#[hdk_extern]
-pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<()> {
-    let cap_claim = CapClaim {
-        grantor: input.grantor,
-        secret: input.cap_secret,
-        tag: String::from("get_all_posts"),
-    };
-
-    create_cap_claim(cap_claim)?;
-
-    Ok(())
-}
-
-#[hdk_extern]
-pub fn create_membrane_proof_for(agent_pub_key: AgentPubKey) -> ExternResult<()> {
-    let response = call(
-        CallTargetCell::OtherRole("private_publication.0".into()),
-        ZomeName::from("posts"),
-        "get_dna_hash".into(),
-        None,
-        (),
-    )?;
-
-    let hash: DnaHash = match response {
-        ZomeCallResponse::Ok(result) => result.decode::<DnaHash>().map_err(|err| wasm_error!(err)),
-        _ => Err(wasm_error!(WasmErrorInner::Guest(
-            "Error making the call remote".into()
-        ))),
-    }?;
-
-    let action_hash = create_entry(EntryTypes::PrivatePublicationMembraneProof(
-        PrivatePublicationMembraneProof {
-            dna_hash: hash,
-            recipient: agent_pub_key.clone(),
-        },
-    ))?;
+pub fn create_membrane_proof_for(proof: PrivatePublicationMembraneProof) -> ExternResult<()> {
+    let action_hash = create_entry(EntryTypes::PrivatePublicationMembraneProof(proof.clone()))?;
 
     create_link(
-        agent_pub_key,
+        proof.recipient,
         action_hash,
         LinkTypes::AgentToMembraneProof,
         (),
