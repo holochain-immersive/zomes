@@ -47,7 +47,7 @@ pub struct StoreCapabilityClaimInput {
 #[hdk_extern]
 pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<()> {
     let cap_claim = CapClaim {
-        author: input.author,
+        grantor: input.author,
         secret: input.cap_secret,
         tag: String::from("request_read_private_publication_posts"),
     };
