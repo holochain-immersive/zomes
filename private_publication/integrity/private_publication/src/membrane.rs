@@ -9,7 +9,7 @@ pub fn is_membrane_proof_valid(
     for_agent: AgentPubKey,
     membrane_proof: Option<MembraneProof>,
 ) -> ExternResult<ValidateCallbackResult> {
-    let progenitor_pub_key = progenitor()?;
+    let progenitor_pub_key = progenitor(())?;
 
     if for_agent == progenitor_pub_key {
         return Ok(ValidateCallbackResult::Valid);

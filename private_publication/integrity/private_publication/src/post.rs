@@ -11,7 +11,7 @@ pub fn validate_create_post(
     action: EntryCreationAction,
     post: Post,
 ) -> ExternResult<ValidateCallbackResult> {
-    if action.author().eq(&progenitor()?) {
+    if action.author().eq(&progenitor(())?) {
         return Ok(ValidateCallbackResult::Valid);
     }
 

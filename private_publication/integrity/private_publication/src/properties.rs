@@ -6,7 +6,8 @@ pub struct Properties {
     progenitor: AgentPubKeyB64,
 }
 
-pub fn progenitor() -> ExternResult<AgentPubKey> {
+#[hdk_extern]
+pub fn progenitor(_: ()) -> ExternResult<AgentPubKey> {
     let properties = dna_info()?.properties;
     let progenitor_properties: Properties =
         Properties::try_from(properties).map_err(|err| wasm_error!(err))?;

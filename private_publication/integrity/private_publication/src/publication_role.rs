@@ -18,7 +18,7 @@ pub fn validate_create_publication_role(
         ));
     }
 
-    let progenitor_pub_key = progenitor()?;
+    let progenitor_pub_key = progenitor(())?;
 
     match action.author().eq(&progenitor_pub_key) {
         true => Ok(ValidateCallbackResult::Valid),
