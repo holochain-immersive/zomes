@@ -48,6 +48,17 @@ pub fn is_membrane_proof_valid(
 
             match maybe_private_publication_membrane_proof {
                 Some(private_publication_membrane_proof) => {
+                    let actual_entry_hash = hash_entry(&private_publication_membrane_proof)?;
+                    let entry_hash_in_action = record.action().entry_hash().ok_or(
+                        wasm_error!(WasmErrorInner::Guest(String::from("The given record doesn't contain an entry hash")))
+                    )?.clone();
+
+                    if !entry_hash_in_action.eq(&actual_entry_hash) {
+                        return Ok(ValidateCallbackResult::Invalid(
+                            "The entry hash is not valid for the given entry".into(),
+                        ));
+                    }
+
                     if private_publication_membrane_proof.dna_hash != dna_info()?.hash {
                         return Ok(ValidateCallbackResult::Invalid(
                             "The membrane proof is not for this dna".into(),
