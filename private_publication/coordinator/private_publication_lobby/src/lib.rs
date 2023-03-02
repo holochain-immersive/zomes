@@ -28,7 +28,7 @@ pub fn grant_capability_to_read(input: GrantCapabilityToReadInput) -> ExternResu
         },
         functions: GrantedFunctions::Listed(BTreeSet::from([(
             zome_info()?.name,
-            FunctionName::from("request_read_all_posts"),
+            FunctionName::from("request_read_private_publication_posts"),
         )])),
         tag: DnaHashB64::from(input.private_publication_dna_hash).to_string(),
     };
@@ -49,7 +49,7 @@ pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<
     let cap_claim = CapClaim {
         grantor: input.grantor,
         secret: input.cap_secret,
-        tag: String::from("get_all_posts"),
+        tag: String::from("request_read_private_publication_posts"),
     };
 
     create_cap_claim(cap_claim)?;
@@ -72,6 +72,7 @@ pub fn read_posts_for_author(author: AgentPubKey) -> ExternResult<Vec<Record>> {
             Entry::CapClaim(claim) => Some(claim.clone()),
             _ => None,
         })
+        .filter(|claim| claim.grantor.eq(&author))
         .collect();
 
     match claims.first() {
@@ -94,7 +95,7 @@ pub fn read_posts_for_author(author: AgentPubKey) -> ExternResult<Vec<Record>> {
                     Ok(posts)
                 }
                 _ => Err(wasm_error!(WasmErrorInner::Guest(
-                    format!("Error making the call remote: {:?}", response)
+                    "Error making the call remote".into()
                 ))),
             }
         }
@@ -135,7 +136,7 @@ pub fn request_read_private_publication_posts(_: ()) -> ExternResult<Vec<Record>
             Ok(posts)
         }
         _ => Err(wasm_error!(WasmErrorInner::Guest(
-            format!("Error making the call remote: {:?}", response)
+            "Error making the call remote".into()
         ))),
     }
 }
