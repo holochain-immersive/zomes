@@ -41,13 +41,13 @@ pub fn grant_capability_to_read(input: GrantCapabilityToReadInput) -> ExternResu
 #[derive(Serialize, Deserialize, Debug)]
 pub struct StoreCapabilityClaimInput {
     cap_secret: CapSecret,
-    grantor: AgentPubKey,
+    author: AgentPubKey,
 }
 
 #[hdk_extern]
 pub fn store_capability_claim(input: StoreCapabilityClaimInput) -> ExternResult<()> {
     let cap_claim = CapClaim {
-        grantor: input.grantor,
+        author: input.author,
         secret: input.cap_secret,
         tag: String::from("request_read_private_publication_posts"),
     };
