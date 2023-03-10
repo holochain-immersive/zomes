@@ -20,6 +20,7 @@ pub enum EntryTypes {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[cfg(not(feature = "exercise2step1"))]
 pub struct CreateCommentInput {
     comment_on: ActionHash,
     comment: String,
