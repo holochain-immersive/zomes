@@ -27,7 +27,7 @@ pub struct CreateCommentInput {
 
 // Creates a new Comment entry, associating it with the "comment_on" header
 #[hdk_extern]
-#[cfg(not(feature = "exercise2step2"))]
+#[cfg(not(feature = "exercise2step1"))]
 pub fn create_comment(input: CreateCommentInput) -> ExternResult<ActionHash> {
     let action_hash = create_entry(EntryTypes::Comment(Comment {
         comment: input.comment,
