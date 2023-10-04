@@ -44,25 +44,6 @@ pub fn get_agent_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<Prof
     inner_get_agent_profile(agent_pub_key)
 }
 
-fn get_profile(action_hash: ActionHash) -> ExternResult<Option<Profile>> {
-    let maybe_element = get(action_hash, GetOptions::default())?;
-
-    match maybe_element {
-        None => Ok(None),
-        Some(element) => {
-            let profile: Profile = element
-                .entry()
-                .to_app_option()
-                .map_err(|err| wasm_error!(err))?
-                .ok_or(wasm_error!(WasmErrorInner::Guest(
-                    "Could not deserialize element to Profile.".into(),
-                )))?;
-
-            Ok(Some(profile))
-        }
-    }
-}
-
 // Gets the profile of the current agent, if we have created it
 #[hdk_extern]
 #[cfg(not(feature = "exercise1step5"))]
@@ -82,5 +63,24 @@ fn inner_get_agent_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<Pr
     match links.first() {
         Some(link) => get_profile(link.target.clone().into()),
         None => Ok(None),
+    }
+}
+
+fn get_profile(action_hash: ActionHash) -> ExternResult<Option<Profile>> {
+    let maybe_record = get(action_hash, GetOptions::default())?;
+
+    match maybe_record {
+        None => Ok(None),
+        Some(record) => {
+            let maybe_entry: Option<Entry> = record.entry.into_option();
+
+            let entry: Entry = maybe_entry.ok_or(wasm_error!(WasmErrorInner::Guest(
+                String::from("This record doesn't include any entry")
+            )))?;
+
+            let profile = Profile::try_from(entry)?;
+
+            return Ok(Some(profile));
+        }
     }
 }
